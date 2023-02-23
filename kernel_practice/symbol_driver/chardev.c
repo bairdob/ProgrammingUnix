@@ -79,6 +79,7 @@ static int device_open(struct inode *inode, struct file *file) {
 
 	Device_Open++; 
 	sprintf(msg, "Я уже сообщил тебе %d раз Hello world!\n", counter++); 
+	printk("The process name is %s\n", current->comm);
 	msg_Ptr = msg; 
 	try_module_get(THIS_MODULE);
 
