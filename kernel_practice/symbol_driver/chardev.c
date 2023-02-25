@@ -27,7 +27,8 @@ static int Major; /* Major-номер, для нашего устройства 
 static int Device_Open = 0; /* Is device open? Используется, чтобы ограничить 
 			     * множественный доступ к устройству */ 
 static char msg[BUF_LEN]; /* The msg the device will give when asked */ 
-static char *msg_Ptr;
+static char *msg_rPtr;
+static char *msg_wPtr;
 static struct file_operations fops = { 
 	.read = device_read, 
 	.write = device_write, 
@@ -52,9 +53,9 @@ int init_module(void) {
 	printk(KERN_INFO "Try various minor numbers. Try to cat and echo to\n"); 
 	printk(KERN_INFO "the device file.\n"); 
 	printk(KERN_INFO "Remove the device file and module when done.\n");
+	sprintf(msg, "Some msg!\n");
 
 	return SUCCESS;
-
 }
 
 /* 
@@ -78,9 +79,10 @@ static int device_open(struct inode *inode, struct file *file) {
 		return -EBUSY;
 
 	Device_Open++; 
-	sprintf(msg, "Я уже сообщил тебе %d раз Hello world!\n", counter++); 
-	printk("The process name is %s\n", current->comm);
-	msg_Ptr = msg; 
+	printk("Я уже сообщил тебе %d раз Hello world!\n", counter++); 
+	printk("Opening /dev/chardev process name is %s\n", current->comm);
+	msg_rPtr = msg; 
+	msg_wPtr = msg;
 	try_module_get(THIS_MODULE);
 
 	return SUCCESS;
@@ -121,13 +123,13 @@ static ssize_t device_read(struct file *filp, /* смотри include/linux/fs.h
 	 * Если конец сообщения, то
 	 * return 0, обозначая конец файла 
 	 */ 
-	if (*msg_Ptr == 0) 
+	if (*msg_rPtr == 0) 
 		return 0;
 
 	/* 
 	 * Фактическая посылка данных в буфер 
 	 */ 
-	while (length && *msg_Ptr) {
+	while (length && *msg_rPtr) {
 
 		/* 
 		 * Буфер находится в user data segment, not the kernel 
@@ -135,7 +137,7 @@ static ssize_t device_read(struct file *filp, /* смотри include/linux/fs.h
 		 * put_user, которая копирует данные из сегмента данных ядра в 
 		 * сегмент данных пользователя.
 		 */ 
-		put_user(*(msg_Ptr++), buffer++);
+		put_user(*(msg_rPtr++), buffer++);
 
 		length--; 
 		bytes_read++;
@@ -148,13 +150,11 @@ static ssize_t device_read(struct file *filp, /* смотри include/linux/fs.h
 	return bytes_read;
 }
 
-/* 
- * Вызывается, когда процесс записывает в файл устройства, например:
- * echo "hi" > /dev/chardev-1 
- */ 
 
 static ssize_t device_write(struct file *filp, const char *buff, size_t len, loff_t * off) {
-
-	printk(KERN_ALERT "Извините, эта операция не поддерживается.\n");
-	return -EINVAL; 
+    int i;
+    for(i=0; i<len && i<BUF_LEN; i++)
+    get_user(msg[i], buff+i);
+    msg_wPtr = msg;
+    return i;
 }
