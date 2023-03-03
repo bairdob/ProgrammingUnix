@@ -2,6 +2,7 @@
 #include <linux/module.h> 
 #include <linux/fs.h> 
 #include <asm/uaccess.h> /* для put_user */
+#include <linux/ioctl.h>
 
 MODULE_LICENSE("GPL");
 /* 
@@ -10,14 +11,20 @@ MODULE_LICENSE("GPL");
 
 int init_module(void); 
 void cleanup_module(void); 
+
 static int device_open(struct inode *, struct file *); 
 static int device_release(struct inode *, struct file *); 
 static ssize_t device_read(struct file *, char *, size_t, loff_t *); 
 static ssize_t device_write(struct file *, const char *, size_t, loff_t *);
+// int device_ioctl(struct inode *inode, struct file *file, unsigned int ioctl_num, unsigned long ioctl_param);
+long device_ioctl(struct file *file, unsigned int ioctl_num, unsigned long ioctl_param);
+
 
 #define SUCCESS 0 
 #define DEVICE_NAME "chardev" /* Имя устройства добаляемое в /proc/devices */
 #define BUF_LEN 1024 /* Максимальная длина сообщения в устройстве */
+
+#define IOCTL_RESET _IOR(Major, 0, int)
 
 /*
  * Глобальные переменные, декларированные как static, глобальные внутри файла. 
@@ -29,11 +36,13 @@ static int Device_Open = 0; /* Is device open? Используется, что�
 static char msg[BUF_LEN]; /* The msg the device will give when asked */ 
 static char *msg_rPtr;
 static char *msg_wPtr;
-static struct file_operations fops = { 
-	.read = device_read, 
-	.write = device_write, 
-	.open = device_open, 
-	.release = device_release 
+
+static struct file_operations fops = {
+	.read = device_read,
+	.write = device_write,
+    .unlocked_ioctl = device_ioctl,
+	.open = device_open,
+	.release = device_release
 };
 
 /*
@@ -157,4 +166,21 @@ static ssize_t device_write(struct file *filp, const char *buff, size_t len, lof
     get_user(msg[i], buff+i);
     msg_wPtr = msg;
     return i;
+}
+
+
+long device_ioctl(struct file *file, unsigned int ioctl_num, unsigned long ioctl_param){
+    int i;
+ 
+    printk(KERN_INFO "Device IOCTL");
+/*    switch (ioctl_num) {
+        case IOCTL_RESET:
+*/
+            char buf[BUF_LEN];
+            for (i = 0; i < BUF_LEN; i++)
+                buf[i] = ' ';
+            
+            device_write(file, buf, i, 0);
+    //}
+    return 0;
 }
