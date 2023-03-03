@@ -57,7 +57,14 @@ $ sudo dmesg
 [11415.046363] The process name is cat
 ```
 
+
 ### log Practice1 task3
+
+requirements https://github.com/jerome-pouiller/ioctl
+
+```
+$ sudo apt install make gcc
+```
 ```bash
 ...
 $ cat /dev/chardev 
