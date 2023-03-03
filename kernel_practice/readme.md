@@ -62,9 +62,6 @@ $ sudo dmesg
 
 requirements https://github.com/jerome-pouiller/ioctl
 
-```
-$ sudo apt install make gcc
-```
 ```bash
 ...
 $ cat /dev/chardev 
