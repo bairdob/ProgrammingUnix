@@ -56,3 +56,23 @@ $ sudo dmesg
 [11413.758657] The process name is cat
 [11415.046363] The process name is cat
 ```
+
+### log Practice1 task3
+```bash
+...
+$ cat /dev/chardev 
+Some msg!
+$ echo -n "hello" > /dev/chardev 
+$ cat /dev/chardev 
+hellomsg!
+$ ioctl /dev/chardev 236
+Decoded values: ioctl=0x000000ec, direction=NONE, arg size=0 bytes, device number=0x00, function number=236
+Used values: ioctl=0x000000ec, direction=NONE, arg size=0 bytes, device number=0x00, function number=236
+Returned 0
+$ cat /dev/chardev 
+# nothing to show
+$ echo -n "hello" > /dev/chardev 
+$ cat /dev/chardev 
+hello
+```
+
