@@ -56,19 +56,8 @@ ssize_t read(struct file *filp, char *buffer, size_t length, loff_t *offset)
     wait_event_interruptible(wq, thr_lock == TRUE);
     thr_lock = FALSE;
     printk(KERN_INFO "Woken Up\n");
-
-    int bytes_read = 0;
-
-    if (*msg_Ptr == 0) 
-        return 0;
-
-    while (length && *msg_Ptr) {
-        put_user(*(msg_Ptr++), buffer++);
-        length--; 
-        bytes_read++;
-    }
-
-    return bytes_read;
+    copy_to_user(buffer, msg, BUF_LEN);
+    return length;
 }
 
 int open(struct inode *inode, struct file *filp)
