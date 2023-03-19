@@ -9,6 +9,7 @@
 #include <linux/errno.h>
 #include <linux/sched.h>
 #include <asm/uaccess.h>
+#include <linux/stat.h>
 
 
 MODULE_LICENSE("GPL");
@@ -22,7 +23,7 @@ MODULE_DESCRIPTION("Waiting Process Demo");
 #define BUF_LEN 1024
 
 static int counter = 0;
-static bool flag = FALSE; 
+static bool thr_lock = FALSE; 
 static dev_t dev;
 static struct cdev c_dev;
 static struct class *cl;
@@ -34,16 +35,15 @@ static char *msg_Ptr;
 struct task_struct *ts; 
 int thread(void *data) { 
     while(1) {
-        printk(KERN_INFO "Inside thread\n");
+        msleep(100);
         sprintf(msg, "%d\n",counter);
         msg_Ptr = msg;
-        if (flag == FALSE) {
+        if (thr_lock == FALSE) {
             counter++;
             printk("Hello. I am kernel thread! counter=%d\n", counter);
             msleep(5000);
-            flag = TRUE;
+            thr_lock = TRUE;
             wake_up_interruptible(&wq);
-            // break;
         } 
     } 
     return 0; 
@@ -53,13 +53,15 @@ ssize_t read(struct file *filp, char *buffer, size_t length, loff_t *offset)
 {
     printk(KERN_INFO "Inside read\n");
     printk(KERN_INFO "Scheduling Out\n");
-    wait_event_interruptible(wq, flag == TRUE);
-    flag = FALSE;
+    wait_event_interruptible(wq, thr_lock == TRUE);
+    thr_lock = FALSE;
     printk(KERN_INFO "Woken Up\n");
-    return 0;
+
     int bytes_read = 0;
+
     if (*msg_Ptr == 0) 
         return 0;
+
     while (length && *msg_Ptr) {
         put_user(*(msg_Ptr++), buffer++);
         length--; 
@@ -72,12 +74,14 @@ ssize_t read(struct file *filp, char *buffer, size_t length, loff_t *offset)
 int open(struct inode *inode, struct file *filp)
 {
     printk(KERN_INFO "Inside open\n");
+    try_module_get(THIS_MODULE);
     return 0;
 }
 
 int release(struct inode *inode, struct file *filp) 
 {
     printk (KERN_INFO "Inside close\n");
+    module_put(THIS_MODULE);
     return 0;
 }
 
@@ -120,16 +124,17 @@ int init_module(void) {
         unregister_chrdev_region(dev, MINOR_CNT);
         return PTR_ERR(dev_ret);
     }
+
     ts=kthread_run(thread,NULL,"foo kthread");
     return 0;
 } 
 
 void cleanup_module(void) { 
+    kthread_stop(ts); 
     printk(KERN_INFO "cleanup_module() called\n"); 
     device_destroy(cl, dev);
     class_destroy(cl);
     cdev_del(&c_dev);
     unregister_chrdev_region(dev, MINOR_CNT);
-    kthread_stop(ts); 
 }
 
