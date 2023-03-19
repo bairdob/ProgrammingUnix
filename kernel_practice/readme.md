@@ -58,7 +58,7 @@ $ sudo dmesg
 ```
 
 
-### log Practice1 task3
+### log Practice2 task3
 
 requirements https://github.com/jerome-pouiller/ioctl
 
