@@ -1,10 +1,10 @@
 [Unit] 
 Description=Service reading from chardev and writing into file 
-[Service] 
-User=bair
-WorkingDirectory=<path to your project directory containing your python script> 
-ExecStart=/home/user/.virtualenv/bin/python main.py 
-Restart=always 
-# replace /home/user/.virtualenv/bin/python with your virtualenv and main.py with your script
 
-[Install] WantedBy=multi-user.target
+[Service] 
+User=root
+ExecStart=/home/bair/kernel_practice/systemd_kernel/symbol_driver/a.out
+Restart=always 
+
+[Install] 
+WantedBy=multi-user.target
