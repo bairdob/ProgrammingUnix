@@ -7,3 +7,17 @@
 - Добавить с символьный драйвер возможность генерировать данные с заданной частотой (1 раз в заданное число секунд)
 
 - Добавить в сервис возможность читать данные из символьного драйвера и писать в файл
+
+### log
+
+```bash
+$ gcc read_chardev.c
+```
+
+```bash
+$ sudo cp read-chardev-write-to-file.service /etc/systemd/system/read-chardev-write-to-file.service
+$ cd /etc/systemd/system/
+$ sudo systemctl daemon-reload
+$ sudo systemctl start read-chardev-write-to-file.service
+$ tail -f chardev.log 
+```
