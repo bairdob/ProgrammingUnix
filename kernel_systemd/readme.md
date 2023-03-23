@@ -14,9 +14,13 @@
 $ gcc read_chardev.c
 ```
 
+
+```bash
+$ touch chardev.log
+```
+
 ```bash
 $ sudo cp read-chardev-write-to-file.service /etc/systemd/system/read-chardev-write-to-file.service
-$ cd /etc/systemd/system/
 $ sudo systemctl daemon-reload
 $ sudo systemctl start read-chardev-write-to-file.service
 $ tail -f chardev.log 
