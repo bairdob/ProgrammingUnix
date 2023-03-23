@@ -1,0 +1,10 @@
+[Unit] 
+Description=Service network spend time
+
+[Service] 
+User=root
+ExecStart=/home/bair/kernel_practice/dbus/dbus_listener.sh
+Restart=always 
+
+[Install] 
+WantedBy=multi-user.target
