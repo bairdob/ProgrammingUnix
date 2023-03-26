@@ -28,3 +28,13 @@ $ ./test
 ```bash
 $ export LD_LIBRARY_PATH=/home/bair/kernel_practice/shm_library/:$LD_LIBRARY_PATH
 ```
+
+### log debian package
+```bash
+$ cd deb/build
+$ dpkg-deb --root-owner-group --build dbg
+dpkg-deb: building package 'dbg' in 'dbg.deb'.
+$ sudo dpkg -i dbg.deb
+$ export LD_LIBRARY_PATH=/usr/lib/dbg/:$LD_LIBRARY_PATH
+
+```
