@@ -1,0 +1,7 @@
+Package: dbg
+Version: 0.1
+Section: utils
+Priority: optional
+Architecture: all
+Maintainer: Bair Dobylov
+Description: Library working with shared memory
