@@ -20,8 +20,7 @@
 ```bash
 $ gcc -c -Wall -Werror -fpic dbg.c
 $ gcc -shared -o libdbg.so dbg.o 
-$ gcc main.c -L /home/bair/kernel_practice/shm_library
- -ldbg -o test 
+$ gcc main.c -L /home/bair/kernel_practice/shm_library -ldbg -o test 
 $ ./test
 ```
 
@@ -36,5 +35,6 @@ $ dpkg-deb --root-owner-group --build dbg
 dpkg-deb: building package 'dbg' in 'dbg.deb'.
 $ sudo dpkg -i dbg.deb
 $ export LD_LIBRARY_PATH=/usr/lib/dbg/:$LD_LIBRARY_PATH
-
+$ gcc main.c -L /usr/lib/dbg -ldbg -o test 
+$ ./test
 ```
