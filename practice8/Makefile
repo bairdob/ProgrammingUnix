@@ -1,5 +1,18 @@
-obj-m += pci.o
+ifneq ($(KERNELRELEASE),)
+    obj-m := pci_skel.o
+
+CONFIG_MODULE_SIG=n
+CONFIG_MODULE_SIG_ALL=n
+
+else
+    KERNEL_DIR ?= /lib/modules/$(shell uname -r)/build
+    PWD := $(shell pwd)
+
 all:
-	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules 
+	$(MAKE) -C $(KERNEL_DIR) M=$(PWD)
+
 clean:
-	make ic /lib/modules/$(shell uname -r)/build M=$(PWD) clean
+	rm -rf *.o *~ core .depend .*.cmd *.ko *.mod.c .tmp_versions modules.order Module.symvers *.mod notes
+
+
+endif
